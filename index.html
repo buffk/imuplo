@@ -8,6 +8,8 @@
 	<script>
 		$( document ).ready( function( ) {
 			$( '#upload-btn' ).Imuplo({
+				resize: true,
+				scaleTo: [480,480],
 				onReadyForUpload: function( file ) {
 					if ( file.src !== null ) // src is null when File API is not supported
 						location.href = file.src;
@@ -15,6 +17,8 @@
 			});
 			$( '#upload-btn2' ).Imuplo({
 				acceptFileTypes: 'image/jpeg',
+				minImageSize: [120, 120],
+				maxImageSize: [960, 960],
 				previewContainerID: 'upload-preview',
 				onChange: function( e ) { $('#informer').html( e ); },
 				onError: function( e ) { $('#informer').html( e ); },
@@ -52,6 +56,8 @@
 		<p>
 			<pre>
 			$( '#upload-btn' ).Imuplo({
+				resize: true,
+				scaleTo: [480,480],
 				onReadyForUpload: function( file ) {
 					if ( file.src !== null ) // src is null when File API is not supported
 						location.href = file.src;
@@ -66,6 +72,8 @@
 			<pre>
 			$( '#upload-btn2' ).Imuplo({
 				acceptFileTypes: 'image/jpeg',
+				minImageSize: [120, 120],
+				maxImageSize: [960, 960],
 				previewContainerID: 'upload-preview',
 				onChange: function( e ) { $('#informer').html( e ); },
 				onError: function( e ) { $('#informer').html( e ); },
@@ -87,12 +95,13 @@
 		<pre>
 		acceptFileTypes: 'image/jpeg,image/png',
 		maxFileSize: 0,
-		multiple: false,
+		multiple: false, // not supported
 		previewContainerID: false,
 		resize: false,
-		resizeMethod: 'crop',
-		maxImageSize: [480, 480],
-		minImageSize: [120, 120],
+		resizeMethod: 'standart', // + Jcrop - next version
+		maxImageSize: [],
+		minImageSize: [],
+		scaleTo: [],
 
 		onChange: function () {},
 		onReadyForUpload: function () {},
