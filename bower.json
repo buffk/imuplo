@@ -1,6 +1,6 @@
 {
   "name": "Imuplo.js",
-  "version": "0.7.15",
+  "version": "0.7.15.02",
   "homepage": "https://github.com/buffk/imuplo.js",
   "authors": [ "Alexandr Kabanov <alex.k.isdg@gmail.com>" ],
   "description": "HTML5 file uploader plugin for jQuery",
