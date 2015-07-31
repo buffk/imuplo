@@ -1,5 +1,5 @@
 /*
-# jquery.imuplo.js v0.7.15
+# jquery.imuplo.js v0.7.15.02
 # HTML5 file uploader plugin for jQuery - released under MIT License 
 # Author: Alexandr Kabanov <alex.k.isdg@gmail.com>
 # http://github.com/buffk/imuplo.js
@@ -67,8 +67,21 @@
 								$options.onChange.call( $this, $publicStatus );
 								if ( window.File && window.FileReader && window.FileList && window.Blob ) {
 									getFileData( $files, $parentContainer ); // load $fileObj
-									$parentContainer.bind( 'dataReady', function () {
+									$parentContainer.bind( 'dataReady', function ( ) {
 										$parentContainer.unbind( 'dataReady' );
+										if ( !isValidImage( [$fileObj.width, $fileObj.height] ) ) {
+											killAll( $elCounter, $options.previewContainerID );
+											$options.onError.call( this, $error );
+											return;
+										}
+										if ( $options.resize && $options.resizeMethod !== false ) {
+											var newImg;
+											if ( newImg = imageResize( $fileObj, $options.resizeMethod, $parentContainer ) ) {
+												$fileObj = newImg; // Does it need a new img obj?
+											} else {
+												$options.onError.call( this, $error );
+											}
+										}
 										if ( $options.previewContainerID !== false ) {
 											showImage( $options.previewContainerID, $fileObj.src );
 										}
@@ -107,6 +120,72 @@
 			return false;
 		}
 
+		function imageResize ( o, method, wrapper ) {
+			var ob = {},
+				wrapperId = wrapper.attr( 'id' ),
+				w = o.width,
+				h = o.height,
+				sx = ( $options.scaleTo[0] ),
+				sy = ( $options.scaleTo[1] ),
+				aspectRX = 1,
+				aspectRY = 1,
+				nw = w,
+				nh = h,
+				centreX = 0,
+				centreY = 0;
+				if ( !sx || !sy ) {
+					$error = 'Option "scaleTo" is undefined';
+					return false;
+				}
+
+			if ( wrapperId == undefined ) {
+				wrapperId = 'imuplo-tc-wrapper';
+				wrapper.attr( 'id', wrapperId );
+			} else {
+				if ( wrapperId.length() < 1 ) {
+					wrapperId = 'imuplo-tc-wrapper';
+					wrapper.attr( 'id', wrapperId );
+				}
+			}
+			switch (method) {
+				case 'standart':
+					aspectRX = w/sx;
+					aspectRY = h/sy;
+					if ( w >= h ) {
+						nw = (sx*aspectRY) | 0;
+						if (nw > w) nw = w;
+						nh = h;
+						centreX = (w/2 - nw/2) | 0;
+						centreY = 0;
+					} else {
+						nw = w;
+						nh = (sy*aspectRX) | 0;
+						if (nh > h) nh = h;
+						centreX = 0;
+						centreY = (h/2 - nh/2) | 0;
+					}
+					wrapper.append('<canvas id="imuplo-tmp-canvas" style="display: none;"></canvas>');
+					canv = document.getElementById('imuplo-tmp-canvas');
+					canv.width = sx;
+					canv.height = sy;
+					canv.getContext('2d').drawImage( o.imobj, centreX, centreY, nw, nh, 0, 0, sx, sy);
+					ob.src = canv.toDataURL( o.type, 0.8 );
+					ob.width = sx;
+					ob.height = sy;
+					ob.blob = dataURItoBlob( ob.src );
+					$( '#imuplo-tmp-canvas' ).remove();
+				break;
+				case 'Jcrop':
+					// insert Jcrop plugin fty
+				break;
+				default:
+					$error = 'Unknown resize method';
+					return false;
+			}
+
+			return $.extend( o, ob );
+		}
+
 		function getFileData( f, el ) {
 			var reader = new FileReader( );
 			reader.onload = function( event ) {
@@ -120,13 +199,28 @@
 							src: img.src,
 							width: img.width,
 							height: img.height,
-							blob: f
+							blob: dataURItoBlob( img.src ),
+							imobj: img
 						}
 					$fileObj = fileObj;
 					el.trigger( 'dataReady' );
 				}
 			}
 			reader.readAsDataURL( f );
+		}
+
+		function dataURItoBlob( dataURI ) {
+			var byteString;
+			if ( dataURI.split(',')[0].indexOf('base64') >= 0 )
+				byteString = atob( dataURI.split(',')[1] );
+			else
+			byteString = unescape( dataURI.split(',')[1] );
+			var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+			var ia = new Uint8Array( byteString.length );
+			for ( var i = 0; i < byteString.length; i++ ) {
+				ia[i] = byteString.charCodeAt(i);
+			}
+			return new Blob([ia], {type:mimeString});
 		}
 
 		function showImage( c, src ) {
@@ -155,6 +249,31 @@
 			}
 			return true;
 		}
+		
+		function isValidImage( img ) {
+			if ( ($options.minImageSize[0] && img[0] < $options.minImageSize[0]) || ($options.minImageSize[1] && img[1] < $options.minImageSize[1]) ) {
+				$error = 'Image too small';
+				return false;
+			}
+			if ( ($options.maxImageSize[0] && img[0] > $options.maxImageSize[0]) || ($options.maxImageSize[1] && img[1] > $options.maxImageSize[1]) ) {
+				$error = 'Image too big';
+				return false;
+			}
+			return true;
+		}
+		
+		function killAll( i, c ) {
+			$fileObj = {};
+			$publicStatus = 'Image is not selected';
+			if ( isElExist( c + '-img' ) ) {
+				$( '#' + c + '-img' ).remove();
+				$( '#' + c ).hide();
+			}
+			if ( isElExist( 'imuplo-tmp-canvas' ) ) {
+				$( '#imuplo-tmp-canvas' ).remove();
+			}
+			$options.onChange.call( this, $publicStatus );
+		}
 		// - - - - - - - - - -
 	}
 
@@ -162,12 +281,13 @@
 
 		acceptFileTypes: 'image/jpeg,image/png',
 		maxFileSize: 0,
-		multiple: false,
+		multiple: false, // not supported
 		previewContainerID: false,
 		resize: false,
-		resizeMethod: 'crop',
-		maxImageSize: [480, 480],
-		minImageSize: [120, 120],
+		resizeMethod: 'standart', // + Jcrop - next version
+		maxImageSize: [],
+		minImageSize: [],
+		scaleTo: [],
 
 		onChange: function () {},
 		onReadyForUpload: function () {},
