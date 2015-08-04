@@ -1,17 +1,26 @@
 {
-  "name": "Imuplo.js",
+  "name": "imuplo",
   "version": "0.8.15.01",
   "homepage": "https://github.com/buffk/imuplo.js",
-  "authors": [ "Alexandr Kabanov <alex.k.isdg@gmail.com>" ],
-  "description": "HTML5 file uploader plugin for jQuery",
-  "main": [
-    "js/jquery.imuplo.js",
+  "authors": [
+    "Alexandr Kabanov <rt_lab@bk.ru>"
   ],
-  "keywords": [ "img", "image", "upload", "uploader", "html5", "file" ],
+  "description": "HTML5 image uploader plugin for jQuery",
+  "main": "jquery.imuplo.js",
+  "keywords": [
+    "image",
+    "upload",
+    "uploader",
+    "html5",
+    "effect",
+    "crop"
+  ],
   "license": "MIT",
   "ignore": [
-    "*/.*",
-    "css",
-    "demo",
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
   ]
 }
