@@ -1,5 +1,5 @@
 /*
-# jquery.imuplo.js v0.7.15.02
+# jquery.imuplo.js v0.8.15.01
 # HTML5 file uploader plugin for jQuery - released under MIT License 
 # Author: Alexandr Kabanov <alex.k.isdg@gmail.com>
 # http://github.com/buffk/imuplo.js
@@ -74,6 +74,10 @@
 											$options.onError.call( this, $error );
 											return;
 										}
+										if ( $options.outputType != false && $options.outputType != $fileObj ) {
+											convertImageFormat( $parentContainer );
+										}
+										
 										if ( $options.resize && $options.resizeMethod !== false ) {
 											var newImg;
 											if ( newImg = imageResize( $fileObj, $options.resizeMethod, $parentContainer ) ) {
@@ -85,6 +89,7 @@
 										if ( $options.previewContainerID !== false ) {
 											showImage( $options.previewContainerID, $fileObj.src );
 										}
+										
 										$options.onReadyForUpload.call( this, $fileObj );
 									});
 								} else {
@@ -120,7 +125,38 @@
 			return false;
 		}
 
-		function imageResize ( o, method, wrapper ) {
+		function convertImageFormat ( wrapper ) {
+			var extensions = {
+				'image/jpeg':'jpg',
+				'image/png':'png',
+				'image/vnd.wap.wbmp':'wbmp',
+				'image/x-windows-bmp':'bmp',
+				'image/bmp':'bmp',
+				'image/vnd.microsoft.icon':'ico',
+				'image/x-icon':'ico',
+				'image/tiff':'tiff',
+				'image/svg+xml':'svg',
+				'image/pjpeg':'jpg',
+				'image/gif':'gif',
+				'image/*':'jpg'
+			};
+			if ( $options.outputType == 'image/*' ) $options.outputType = 'image/jpeg';
+			wrapper.append('<canvas id="imuplo-tmp-canvas" style="display: none;"></canvas>');
+			canv = document.getElementById('imuplo-tmp-canvas');
+			canv.width = $fileObj.width;
+			canv.height = $fileObj.height;
+			canv.getContext('2d').drawImage( $fileObj.imobj, 0, 0, $fileObj.width, $fileObj.height );
+			$fileObj.src = canv.toDataURL( $options.outputType, $options.compression );
+			$fileObj.type = $options.outputType;
+			$fileObj.blob = dataURItoBlob( $fileObj.src );
+			$fileObj.size = $fileObj.blob.size;
+			var tmp = $fileObj.name.split( '.' );
+			tmp.pop();
+			$fileObj.name = tmp.join( '.' ) + '.' + extensions[$options.outputType];
+			$( '#imuplo-tmp-canvas' ).remove();
+		}
+
+		function imageResize( o, method, wrapper ) {
 			var ob = {},
 				wrapperId = wrapper.attr( 'id' ),
 				w = o.width,
@@ -169,7 +205,7 @@
 					canv.width = sx;
 					canv.height = sy;
 					canv.getContext('2d').drawImage( o.imobj, centreX, centreY, nw, nh, 0, 0, sx, sy);
-					ob.src = canv.toDataURL( o.type, 0.8 );
+					ob.src = canv.toDataURL( $options.outputType, $options.compression );
 					ob.width = sx;
 					ob.height = sy;
 					ob.blob = dataURItoBlob( ob.src );
@@ -243,7 +279,11 @@
 			var ftypes = $options.acceptFileTypes,
 				ftype = f.type,
 				imageTypeRX = /^image\//;
-			if ( ftypes.indexOf(ftype) === -1 || !imageTypeRX.test( ftype ) ) {
+			if ( $options.acceptFileTypes != 'image/*' && ftypes.indexOf(ftype) === -1 ) {
+				$error = 'Wrong type of file';
+				return false;
+			}
+			if ( !imageTypeRX.test( ftype ) ) {
 				$error = 'Wrong type of file';
 				return false;
 			}
@@ -288,6 +328,8 @@
 		maxImageSize: [],
 		minImageSize: [],
 		scaleTo: [],
+		outputType: 'image/jpeg',
+		compression: 1,
 
 		onChange: function () {},
 		onReadyForUpload: function () {},

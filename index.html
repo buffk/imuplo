@@ -4,19 +4,21 @@
 	<title>Imuplo.js - jQuery Image Uploading Plugin</title>
 	<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-	<script src="js/jquery.imuplo.min.js"></script>
+	<script src="js/jquery.imuplo.js"></script>
 	<script>
 		$( document ).ready( function( ) {
 			$( '#upload-btn' ).Imuplo({
 				resize: true,
 				scaleTo: [480,480],
+				acceptFileTypes: 'image/*',
+				outputType: 'image/jpeg',
+				compression: 1,
 				onReadyForUpload: function( file ) {
 					if ( file.src !== null ) // src is null when File API is not supported
 						location.href = file.src;
 				}
 			});
 			$( '#upload-btn2' ).Imuplo({
-				acceptFileTypes: 'image/jpeg',
 				minImageSize: [120, 120],
 				maxImageSize: [960, 960],
 				previewContainerID: 'upload-preview',
@@ -58,6 +60,9 @@
 			$( '#upload-btn' ).Imuplo({
 				resize: true,
 				scaleTo: [480,480],
+				acceptFileTypes: 'image/*',
+				outputType: 'image/jpeg',
+				compression: 1,
 				onReadyForUpload: function( file ) {
 					if ( file.src !== null ) // src is null when File API is not supported
 						location.href = file.src;
