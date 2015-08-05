@@ -1,5 +1,5 @@
 /*
-# jquery.imuplo.js v0.8.15.01
+# jquery.imuplo.js v0.8.15.02
 # HTML5 file uploader plugin for jQuery - released under MIT License 
 # Author: Alexandr Kabanov <alex.k.isdg@gmail.com>
 # http://github.com/buffk/imuplo.js
@@ -178,7 +178,7 @@
 				wrapperId = 'imuplo-tc-wrapper';
 				wrapper.attr( 'id', wrapperId );
 			} else {
-				if ( wrapperId.length() < 1 ) {
+				if ( wrapperId.length < 1 ) {
 					wrapperId = 'imuplo-tc-wrapper';
 					wrapper.attr( 'id', wrapperId );
 				}
