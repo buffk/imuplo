@@ -1,5 +1,5 @@
 /*
-# jquery.imuplo.js v0.8.15.2
+# jquery.imuplo.js v0.8.15.21
 # HTML5 file uploader plugin for jQuery - released under MIT License 
 # Author: Alexandr Kabanov <alex.k.isdg@gmail.com>
 # http://github.com/buffk/imuplo.js
@@ -659,12 +659,13 @@
 				$( '#' + c ).hide();
 				$( '#' + c ).html('<img src="' + $fileObj.src + '" id="' + c + '-img' + '" />');
 				$( '#' + c + '-img' ).css( 'width', $( '#' + c ).css('width') );
+				$( '#' + c + '-img' ).height( ( $( '#' + c ).width() * ( $fileObj.height / $fileObj.width ) ) | 0 );
 				$( '#' + c + '-img' ).load( function() {
 					$( '#' + c ).append('<canvas id="imuplo-tmp-canvas" style="display: block;"></canvas>');
 					canv = document.getElementById('imuplo-tmp-canvas');
 					canv.width = $( '#' + c ).width();
 					canv.height = $( '#' + c + '-img' ).height();
-					$( '#' + c ).height( $( '#' + c + '-img' ).height() );
+					//$( '#' + c ).height( $( '#' + c + '-img' ).height() );
 					canv.getContext('2d').drawImage( $fileObj.imobj, 0, 0, $fileObj.width, $fileObj.height, 0, 0, canv.width, canv.height );
 					newSrc = canv.toDataURL( $options.outputType, $options.compression );
 					$( '#imuplo-tmp-canvas' ).remove();
