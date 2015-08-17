@@ -1,5 +1,5 @@
 /*
-# jquery.imuplo.js v0.8.15.17
+# jquery.imuplo.js v0.8.15.2
 # HTML5 file uploader plugin for jQuery - released under MIT License 
 # Author: Alexandr Kabanov <alex.k.isdg@gmail.com>
 # http://github.com/buffk/imuplo.js
