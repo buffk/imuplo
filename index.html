@@ -3,37 +3,60 @@
 <head>
 	<title>Imuplo.js - jQuery Image Uploading Plugin</title>
 	<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+	<link rel="stylesheet" href="css/Jcrop.min.css" type="text/css" />
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+	<script src="js/Jcrop.min.js"></script>
 	<script src="js/jquery.imuplo.min.js"></script>
 	<script>
 		$( document ).ready( function( ) {
-			$( '#upload-btn' ).Imuplo({
-				resize: true,
-				scaleTo: [480,480],
-				acceptFileTypes: 'image/*',
-				outputType: 'image/jpeg',
-				compression: 1,
-				onReadyForUpload: function( file ) {
-					if ( file.src !== null ) // src is null when File API is not supported
-						location.href = file.src;
-				}
+			$( '#upload-btn' ).click( function( ) {
+				$( '#upload-btn' ).Imuplo({
+					resize: true,
+					scaleTo: [480,480],
+					acceptFileTypes: 'image/*',
+					outputType: 'image/jpeg',
+					compression: 1,
+					onReadyForUpload: function( file ) {
+						if ( file.src !== null ) // src is null when File API is not supported
+							location.href = file.src;
+					}
+				});
 			});
-			$( '#upload-btn2' ).Imuplo({
-				minImageSize: [120, 120],
-				maxImageSize: [960, 960],
-				previewContainerID: 'upload-preview',
-				onChange: function( e ) { $('#informer').html( e ); },
-				onError: function( e ) { $('#informer').html( e ); },
-				onReadyForUpload: function( file ) {
-					$('#informer').html( file.name + ' ready for upload' );
-					// USE file.blob for old school methods
-				}
+
+			$( '#upload-btn2' ).click( function( ) {
+				$( '#upload-btn2' ).Imuplo({
+					minImageSize: [120, 120],
+					maxImageSize: [5000, 5000],
+					previewContainerID: 'upload-preview',
+					resize: true,
+					addFX: true,
+					FXIContainer: 'fx-buttons',
+					resizeMethod: 'jcrop',
+					jcrop: {
+						aspect: 1,
+						displayThumb: true,
+						thumbSize: [50, 50],
+						thumbClass: 'imuplo-jcrop-thumb',
+						cropReadyButtonClass: 'bt-cropready',
+						cropReadyButtonContent: 'Ready to go!'
+					},
+					onChange: function( e ) { $('#informer').html( e ); },
+					onError: function( e ) { console.log( e ); },
+					onReadyForUpload: function( file ) {
+						$('#informer').html( file.name + ' ready for upload' );
+						// USE file.blob for old school methods
+					}
+				});
 			});
 		});
 	</script>
 	<style>
-		#upload-preview {display: block; width: 200px; height: 200px; overflow: hidden; text-align: center; display:none;}
+		#upload-preview {display: block; width: 240px; height: 240px; overflow: hidden; text-align: center; display:none;}
 		#informer {color:#99B; font-size:11px;}
+		.imuplo-jcrop-thumb {position: fixed; top: 5px; left: 5px;}
+		#fx-buttons {position: fixed; top: 60px; left: 5px; width: 150px;}
+		#fx-buttons>a {display:inline-block; margin: 3px; padding: 3px 5px; background: #444; text-decoration: none;}
+		#fx-buttons>a:hover, #fx-buttons>a.active {background: #000;}
 		a {color: #c60b46;}
 		hr {border: 0; border-bottom:#DDD 1px solid;}
 		.container {
@@ -75,17 +98,30 @@
 		<p><b>2</b>: Click <a href="#informer" id="upload-btn2">#upload-btn2</a> to Upload and preview image info.</p>
 		<p>
 			<pre>
-			$( '#upload-btn2' ).Imuplo({
-				acceptFileTypes: 'image/jpeg',
-				minImageSize: [120, 120],
-				maxImageSize: [960, 960],
-				previewContainerID: 'upload-preview',
-				onChange: function( e ) { $('#informer').html( e ); },
-				onError: function( e ) { $('#informer').html( e ); },
-				onReadyForUpload: function( file ) {
-					$('#informer').html( file.name + ' ready for upload' );
-					// USE file.blob for old school methods
-				}
+			$( '#upload-btn2' ).click( function( ) {
+				$( '#upload-btn2' ).Imuplo({
+					minImageSize: [120, 120],
+					maxImageSize: [5000, 5000],
+					previewContainerID: 'upload-preview',
+					resize: true,
+					addFX: true,
+					FXIContainer: 'fx-buttons',
+					resizeMethod: 'jcrop',
+					jcrop: {
+						aspect: 1,
+						displayThumb: true,
+						thumbSize: [50, 50],
+						thumbClass: 'imuplo-jcrop-thumb',
+						cropReadyButtonClass: 'bt-cropready',
+						cropReadyButtonContent: 'Ready to go!'
+					},
+					onChange: function( e ) { $('#informer').html( e ); },
+					onError: function( e ) { console.log( e ); },
+					onReadyForUpload: function( file ) {
+						$('#informer').html( file.name + ' ready for upload' );
+						// USE file.blob for old school methods
+					}
+				});
 			});
 			</pre>
 		</p>
@@ -103,13 +139,42 @@
 		multiple: false, // not supported
 		previewContainerID: false,
 		resize: false,
-		resizeMethod: 'standart', // + Jcrop - next version
+		addFX: false,
+		useFXStrength: true,
+		FXList: [ 'default', 'godzilla', 'megalon', 'gigan', 'hedorah', 'megaguirus', 'biollante', 'mothra', 'bw' ],
+		FXIContainer: 'imuplo-fx-block',
+		resizeMethod: 'standard',
 		maxImageSize: [],
 		minImageSize: [],
 		scaleTo: [],
-
+		outputType: 'image/jpeg',
+		compression: 1,
+		jcrop: {
+			aspect: 1,
+			thumbSize: [64, 64],
+			displayThumb: false,
+			thumbClass: 'imuplo-jcrop-thumb',
+			cropReadyButtonClass: 'imuplo-jcrop-bt-cropready',
+			cropReadyButtonContent: 'CROP'
+		},
+		FX: {
+			readyButtonClass: 'imuplo-fx-bt-ready',
+			readyButtonContent: 'APPLY',
+			presets: {
+				'default': 		[ 0,	'Без эффекта'],
+				'godzilla':		[ 65 ],
+				'megalon':		[ 75 ],
+				'gigan':		[ 75 ],
+				'hedorah':		[ 100 ],
+				'megaguirus':	[ 75 ],
+				'biollante':	[ 75 ],
+				'mothra':		[ 75 ],
+				'bw':			[ 0,	'Тлен' ]
+			}
+		},
 		onChange: function () {},
 		onReadyForUpload: function () {},
+		onFXReady: function () {},
 		onError: function () {}
 		</pre>
 	</div>
