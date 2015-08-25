@@ -1,6 +1,6 @@
 /*
-# jquery.imuplo.js v0.8.15.21
-# HTML5 file uploader plugin for jQuery - released under MIT License 
+# jquery.imuplo.js v0.8.15.22
+# HTML5 file uploader plugin for jQuery - released under MIT License
 # Author: Alexandr Kabanov <alex.k.isdg@gmail.com>
 # http://github.com/buffk/imuplo.js
 # Copyright (c) 2015 Alexandr Kabanov
@@ -75,7 +75,7 @@
 							if ( $options.outputType != false && $options.outputType != $fileObj ) {
 								convertImageFormat( $parentContainer );
 							}
-														
+
 							if ( $options.resize && $options.resizeMethod !== false ) {
 								var newImg;
 								if ( imageResize( $fileObj, $options.resizeMethod, $parentContainer ) ) {
@@ -248,6 +248,7 @@
 							return false;
 						} else {
 							cropper.load( function() {
+								cropper.unbind('load');
 								cropper.Jcrop( {
 									boxWidth: cropper.width(),
 									boxHeight: cropper.height(),
@@ -291,10 +292,13 @@
 														$parentContainer.unbind( 'onResizeReady' );
 														applyFX( $parentContainer );
 														showImage( $options.previewContainerID );
+														$parentContainer.bind( 'onApplyFXReady', function ( ) {
+															$options.onReadyForUpload.call( this, $fileObj );
+														});
 													});
+												} else {
+													$options.onReadyForUpload.call( this, $fileObj );
 												}
-												
-												$options.onReadyForUpload.call( this, $fileObj );
 											}
 										}
 									});
@@ -330,13 +334,13 @@
 					$( '#' + $options.previewContainerID ).prepend(
 						'<canvas id="' + fxCanvas + '" width="'+ cw +'" height="'+ ch +'" style="width:'+ cw +'px; height:'+ ch +'px;">'
 					);
-					
+
 					var previewCanvas = document.getElementById( fxCanvas ),
 						ctx = previewCanvas.getContext('2d');
 
 					ctx.drawImage($fileObj.imobj, 0, 0, $fileObj.width, $fileObj.height, 0, 0, previewCanvas.width, previewCanvas.height);
 				}
-				
+
 				if ( !$options.resize || $options.resizeMethod != 'jcrop' ) {
 					if ( isElExist( $options.previewContainerID + '-bt-ready' ) )
 						$('#' + $options.previewContainerID + '-bt-ready').remove();
@@ -351,14 +355,16 @@
 							$('#' + $options.previewContainerID + '-bt-ready').remove( );
 							$( '#' + $options.FXIContainer ).remove( );
 							applyFX( $parentContainer );
-							showImage( $options.previewContainerID );
-							$options.onReadyForUpload.call( this, $fileObj );
+							$parentContainer.bind( 'onApplyFXReady', function ( ) {
+								showImage( $options.previewContainerID );
+								$options.onReadyForUpload.call( this, $fileObj );
+							});
 						}
 					});
 				}
-				
+
 				if ( isElExist( fxContainer ) ) $('#' + fxContainer).remove();
-				$( '#' + $options.previewContainerID ).parent().prepend('<div id="' + fxContainer + '"></div>');
+				$( '#' + $options.previewContainerID ).parent().append('<div id="' + fxContainer + '"></div>');
 				$options.FXList.forEach( function( e ) {
 					var strength = $fx.presets[e][0];
 					var name = $fx.presets[e][1];
@@ -374,11 +380,11 @@
 							$( '#' + fxContainer + '>a' ).each( function ( ) { $( this ).removeClass('active'); });
 							$( this ).addClass('active');
 							$fileObj.fxStrength = $( this ).attr( 'fx-strength' );
+							$options.onFXReady.call( $this, { c: $( '#' + fxContainer ), a: $( this ), name: $fileObj.fx, strength: $fileObj.fxStrength} );
 							drawFX( fxCanvas );
 						}
 					});
 				});
-				$options.onFXReady.call( $this, $( '#' + fxContainer ) );
 
 				return fxCanvas;
 			} else {
@@ -464,7 +470,7 @@
 						x++;
 					}
 					$parentContainer.append(
-						'<canvas id="imuplo-vgn-canvas" width="' + imgObject.width + '" height="' + 
+						'<canvas id="imuplo-vgn-canvas" width="' + imgObject.width + '" height="' +
 						imgObject.height + '" style="width:' + imgObject.width + 'px; height:' + imgObject.height + 'px; display: none;">'
 					);
 					vgnObject = drawVignette( imgObject.width, imgObject.height, $fileObj.fxStrength );
@@ -480,7 +486,7 @@
 
 				case 'hedorah':
 					$parentContainer.append(
-						'<canvas id="imuplo-vgn-canvas" width="' + imgObject.width + '" height="' + 
+						'<canvas id="imuplo-vgn-canvas" width="' + imgObject.width + '" height="' +
 						imgObject.height + '" style="width:' + imgObject.width + 'px; height:' + imgObject.height + 'px; display: none;">'
 					);
 					vgnObject = drawVignette( imgObject.width, imgObject.height, $fileObj.fxStrength );
@@ -496,7 +502,7 @@
 
 				case 'mothra':
 					$parentContainer.append(
-						'<canvas id="imuplo-vgn-canvas" width="' + imgObject.width + '" height="' + 
+						'<canvas id="imuplo-vgn-canvas" width="' + imgObject.width + '" height="' +
 						imgObject.height + '" style="width:' + imgObject.width + 'px; height:' + imgObject.height + 'px; display: none;">'
 					);
 					vgnObject = drawVignette( imgObject.width, imgObject.height, $fileObj.fxStrength );
@@ -530,7 +536,7 @@
 						x++;
 					}
 					$parentContainer.append(
-						'<canvas id="imuplo-vgn-canvas" width="' + imgObject.width + '" height="' + 
+						'<canvas id="imuplo-vgn-canvas" width="' + imgObject.width + '" height="' +
 						imgObject.height + '" style="width:' + imgObject.width + 'px; height:' + imgObject.height + 'px; display: none;">'
 					);
 					vgnObject = drawVignette( imgObject.width, imgObject.height, $fileObj.fxStrength );
@@ -546,7 +552,7 @@
 
 				case 'gigan':
 					$parentContainer.append(
-						'<canvas id="imuplo-vgn-canvas" width="' + imgObject.width + '" height="' + 
+						'<canvas id="imuplo-vgn-canvas" width="' + imgObject.width + '" height="' +
 						imgObject.height + '" style="width:' + imgObject.width + 'px; height:' + imgObject.height + 'px; display: none;">'
 					);
 					vgnObject = drawVignette( imgObject.width, imgObject.height, $fileObj.fxStrength );
@@ -589,6 +595,7 @@
 			$fileObj.src = canv.toDataURL( $options.outputType, $options.compression );
 			$fileObj.blob = dataURItoBlob( $fileObj.src );
 			$fileObj.imobj.src = $fileObj.src;
+			$fileObj.imobj.onload = function( ) { $parentContainer.trigger( 'onApplyFXReady' ); }
 			$( '#imuplo-fxtmp-canvas' ).remove();
 		}
 
@@ -609,7 +616,7 @@
 				$fileObj.cropSize = size;
 			return true;
 		}
-		
+
 		function translateGlobal( coords, box ) {
 			var nc = [];
 			nc[0] = coords[0] * ( $fileObj.width / box[0] ) | 0;
@@ -670,7 +677,7 @@
 					newSrc = canv.toDataURL( $options.outputType, $options.compression );
 					$( '#imuplo-tmp-canvas' ).remove();
 					$( '#' + c + '-img' ).attr( 'src', newSrc );
-				});				
+				});
 				$( '#' + c ).show();
 				return $( '#' + c + '-img' );
 			}
@@ -696,7 +703,7 @@
 			}
 			return true;
 		}
-		
+
 		function isValidImage( img ) {
 			if ( ($options.minImageSize[0] && img[0] < $options.minImageSize[0]) || ($options.minImageSize[1] && img[1] < $options.minImageSize[1]) ) {
 				$error = 'Image too small';
@@ -708,7 +715,7 @@
 			}
 			return true;
 		}
-		
+
 		function killAll( c ) {
 			$fileObj = {};
 			$publicStatus = 'Image is not selected';
