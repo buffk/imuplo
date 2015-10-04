@@ -1,5 +1,5 @@
 /*
-# jquery.imuplo.js v0.8.15.22
+# jquery.imuplo.js v0.8.15.23
 # HTML5 file uploader plugin for jQuery - released under MIT License
 # Author: Alexandr Kabanov <alex.k.isdg@gmail.com>
 # http://github.com/buffk/imuplo.js
@@ -197,6 +197,7 @@
 					wrapper.attr( 'id', wrapperId );
 				}
 			}
+
 			switch (method) {
 				case 'standard':
 					if ( $fileObj.cropSize[0] > 0 && $fileObj.cropSize[1] > 0 ) {
@@ -233,7 +234,7 @@
 					$fileObj = $.extend( o, ob );
 					$fileObj.imobj.src = ob.src;
 					$( '#imuplo-tmp-canvas' ).remove();
-					$fileObj.imobj.onload = function( ) { $parentContainer.trigger( 'onResizeReady' ); }
+					$fileObj.imobj.onload = function( ) { $parentContainer.trigger( 'onResizeReady' ); return false;}
 					// Show it
 					if ( $options.previewContainerID !== false && !$options.addFX ) {
 						showImage( $options.previewContainerID );
@@ -595,7 +596,7 @@
 			$fileObj.src = canv.toDataURL( $options.outputType, $options.compression );
 			$fileObj.blob = dataURItoBlob( $fileObj.src );
 			$fileObj.imobj.src = $fileObj.src;
-			$fileObj.imobj.onload = function( ) { $parentContainer.trigger( 'onApplyFXReady' ); }
+			$fileObj.imobj.onload = function( ) { $parentContainer.trigger( 'onApplyFXReady' ); return false;}
 			$( '#imuplo-fxtmp-canvas' ).remove();
 		}
 
@@ -651,7 +652,9 @@
 						}
 					$fileObj = fileObj;
 					el.trigger( 'dataReady' );
+					return false;
 				}
+				return false;
 			}
 			reader.readAsDataURL( f );
 		}
@@ -663,22 +666,20 @@
 
 		function showImage( c ) {
 			if ( isElExist( c ) ) {
-				$( '#' + c ).hide();
 				$( '#' + c ).html('<img src="' + $fileObj.src + '" id="' + c + '-img' + '" />');
-				$( '#' + c + '-img' ).css( 'width', $( '#' + c ).css('width') );
+				$( '#' + c + '-img' ).width( $( '#' + c ).width() );
 				$( '#' + c + '-img' ).height( ( $( '#' + c ).width() * ( $fileObj.height / $fileObj.width ) ) | 0 );
 				$( '#' + c + '-img' ).load( function() {
+					$( '#' + c + '-img' ).unbind('load');
 					$( '#' + c ).append('<canvas id="imuplo-tmp-canvas" style="display: block;"></canvas>');
 					canv = document.getElementById('imuplo-tmp-canvas');
 					canv.width = $( '#' + c ).width();
 					canv.height = $( '#' + c + '-img' ).height();
-					//$( '#' + c ).height( $( '#' + c + '-img' ).height() );
 					canv.getContext('2d').drawImage( $fileObj.imobj, 0, 0, $fileObj.width, $fileObj.height, 0, 0, canv.width, canv.height );
 					newSrc = canv.toDataURL( $options.outputType, $options.compression );
 					$( '#imuplo-tmp-canvas' ).remove();
 					$( '#' + c + '-img' ).attr( 'src', newSrc );
 				});
-				$( '#' + c ).show();
 				return $( '#' + c + '-img' );
 			}
 			return false;
